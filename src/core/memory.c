@@ -29,18 +29,18 @@
 
 // Convert from virtual addresses in our own process address space to
 // physical addresses in the RAM chips.
-intptr_t virtual_to_physical(intptr_t *ptr)
+uintptr_t virtual_to_physical(uintptr_t *ptr)
 {
-  intptr_t virt_page;
+  uintptr_t virt_page;
   static int pagemap_fd;
-  virt_page = ((intptr_t)ptr) / 4096;
+  virt_page = ((uintptr_t)ptr) / 4096;
   if (pagemap_fd == 0) {
     if ((pagemap_fd = open("/proc/self/pagemap", O_RDONLY)) <= 0) {
       perror("open pagemap");
       return 0;
     }
   }
-  intptr_t data;
+  uintptr_t data;
   int len;
   len = pread(pagemap_fd, &data, sizeof(data), virt_page * sizeof(uint64_t));
   if (len != sizeof(data)) {
@@ -80,7 +80,7 @@ intptr_t virtual_to_physical(intptr_t *ptr)
 void *allocate_huge_page(int size)
 {
   int shmid = -1;
-  intptr_t physical_address, virtual_address;
+  uintptr_t physical_address, virtual_address;
   void *tmpptr = MAP_FAILED;  // initial kernel assigned virtual address
   void *realptr = MAP_FAILED; // remapped virtual address
   shmid = shmget(IPC_PRIVATE, size, SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
